@@ -26,48 +26,86 @@ https://dl.broadcom.com/<Download Token>/PROD/COMP/ESX_HOST/vmtools-main/vmw-dep
 
 ---
 
-## Các phương án cập nhật ESXi
+Các phương án cập nhật hệ thống VMware hiện tại
+1. ✅ Cập nhật qua CLI – Dành cho hệ thống Standalone
+Chuẩn bị:
 
-### 1. Cập nhật CLI Offline (Standalone Host)
+Tải file .zip từ portal Broadcom hoặc từ bạn bè có license.
 
-- Tải file zip offline từ Broadcom hoặc các nguồn có license.
-- Upload file zip lên datastore.
-- Thực hiện lệnh:
+Upload lên /vmfs/volumes/datastore1/ hoặc thư mục tạm /tmp.
 
-```bash
+Lệnh cập nhật:
+
+bash
+Copy
+Edit
 esxcli software profile update -d /vmfs/volumes/datastore1/ESXi-8.0U3e-depot.zip -p ESXi-8.0U3e-0-24674464
 reboot
-2. Cập nhật Offline bằng vCenter Lifecycle Manager
-Upload ISO hoặc ZIP image ESXi vào vCenter Lifecycle Manager.
+2. ✅ Cập nhật Offline bằng vCenter (vSphere Lifecycle Manager)
+Phù hợp cho hệ thống có vCenter nhưng không có license token hoặc muốn chủ động cập nhật nội bộ.
 
-Tạo image base.
+Tải về: File ISO hoặc ZIP của image ESXi/Patch
 
-Gán image base cho cluster, stage và remediate các host.
+Thao tác:
 
-Backup là bắt buộc
-Trước khi update:
+Vào vCenter → Lifecycle Manager → Imported ISOs
 
-Snapshot VM
+Upload file ISO/ZIP
 
-Backup cấu hình ESXi
+Tạo Image Base
 
-Backup bằng phần mềm chuyên dụng (Veeam, Nakivo,...)
+Gán image vào cluster → Stage → Remediate
 
-Kinh nghiệm cập nhật ESXi 8.0U3e
-Đã cập nhật thành công bản vá CVE mới nhất
+🛡️ ⚠️ ĐỪNG QUÊN: Backup trước khi update!
+Backup là bắt buộc trước bất kỳ đợt cập nhật nào. Dưới đây là các gợi ý:
 
-Hệ thống ổn định, không gặp lỗi driver hay network
+✅ Snapshot toàn bộ VM đang chạy (nếu dung lượng cho phép)
 
-Kết luận
-Broadcom đang siết chặt kiểm soát license, làm tăng chi phí và giới hạn khả năng update. Đây là lúc các doanh nghiệp nên cân nhắc chuyển sang các nền tảng ảo hóa khác như:
+✅ Backup config ESXi host bằng PowerCLI hoặc vim-cmd / esxcli
 
-Proxmox VE
+✅ Với vCenter: export cấu hình bằng VAMI hoặc file OVF
 
-Microsoft Hyper-V
+✅ Sao lưu toàn bộ bằng phần mềm chuyên dụng như Veeam, Nakivo, Altaro, Vinchin...
 
-Nutanix AHV
+Việc backup không chỉ giúp rollback khi lỗi mà còn đảm bảo an toàn nếu patch mới gây xung đột driver hoặc lỗi I/O.
 
-Để tránh phụ thuộc và giảm chi phí lâu dài.
+🔧 Trải nghiệm thực tế: Cập nhật ESXi 8.0U3e vá CVE mới
+Tôi vừa cập nhật thành công toàn bộ host lên bản:
+
+ESXi 8.0U3e (Build 24674464)
+
+Vá các lỗ hổng bảo mật nghiêm trọng được công bố tháng 5/2025
+
+Hệ thống hoạt động mượt, không crash driver, không treo iSCSI/NIC
+
+📌 Tổng hợp các phương án
+Phương án cập nhật	License Broadcom	Internet	Mức độ dễ	Quản lý tập trung
+Online qua token	✅ Cần	✅ Có	⭐⭐⭐⭐	✅ Có
+Offline CLI	❌ Không cần	❌ Không	⭐⭐⭐	❌ Không
+vCenter Offline	❌ Không cần	❌ Không	⭐⭐⭐⭐	✅ Có
+
+🧭 Lời kết: Đã đến lúc giảm phụ thuộc vào VMware?
+Broadcom đang khiến hệ sinh thái VMware trở nên "đắt đỏ" và khó tiếp cận hơn với:
+
+Giá license tăng cao
+
+Tính năng bị giới hạn nếu không có hỗ trợ chính thức
+
+Khó khăn trong cập nhật và bảo trì nếu không có internet/token
+
+💡 Giải pháp dài hạn:
+
+👉 Xem xét chuyển sang nền tảng mã nguồn mở hoặc ít phụ thuộc:
+
+Proxmox VE: Nguồn mở, ổn định, mạnh mẽ, dễ quản lý, cộng đồng lớn
+
+Microsoft Hyper-V / Azure Stack HCI: Cho hệ sinh thái Microsoft, hybrid tốt
+
+Nutanix AHV, XCP-ng, OpenStack: Nếu quy mô lớn
+
+🌱 Nếu bạn là doanh nghiệp SME hoặc tổ chức IT nội bộ muốn linh hoạt và tiết kiệm hơn, Proxmox hoặc Hyper-V là hướng đi phù hợp để giảm rủi ro bị khóa vendor.
+
+📬 Cần tư vấn thiết kế nền tảng ảo hóa mới, backup chuẩn 3-2-1 hoặc nâng cấp ESXi an toàn?
 
 Liên hệ
 Email: phuongit.contact@gmail.com
